@@ -21,7 +21,6 @@ import ko from 'react-intl/locale-data/ko';
 import lt from 'react-intl/locale-data/lt';
 import pt from 'react-intl/locale-data/pt';
 import fa from 'react-intl/locale-data/fa';
-import he from 'react-intl/locale-data/he';
 
 // Constants
 import AUTH_TYPE from '../../../constants/authType';
@@ -67,58 +66,43 @@ import {
   setNsfw,
   isDefaultFooter,
 } from '../../../redux/actions/applicationActions';
+import { toastNotification as toastNotificationAction } from '../../../redux/actions/uiAction';
 
-// Container
+// Components
 import ApplicationScreen from '../screen/applicationScreen';
 import { Launch } from '../..';
 
 addLocaleData([...en, ...ru, ...de, ...id, ...it, ...hu, ...tr, ...ko, ...pt, ...lt, ...fa]);
 
 class ApplicationContainer extends Component {
-  constructor() {
-    super();
-    this.state = {
-      isRenderRequire: true,
-      isReady: false,
-      isIos: Platform.OS !== 'android',
-      isThemeReady: false,
-    };
-  }
+  state = {
+    isRenderRequire: true,
+    isReady: false,
+    isIos: Platform.OS !== 'android',
+    isThemeReady: false,
+  };
 
   componentDidMount = async () => {
     const { isIos } = this.state;
-    let isConnected;
 
-    await NetInfo.isConnected.fetch().then((_isConnected) => {
-      isConnected = _isConnected;
-    });
+    const isConnected = await NetInfo.isConnected.fetch();
 
-    // NetInfo.isConnected.addEventListener('connectionChange', this._handleConntectionChange);
     if (!isIos) BackHandler.addEventListener('hardwareBackPress', this._onBackPress);
 
-    if (isConnected) {
-      this._fetchApp();
-    } else {
-      Alert.alert('No internet connection');
-    }
+    if (isConnected) this._fetchApp();
+    else Alert.alert('No internet connection');
 
     this.globalInterval = setInterval(this._refreshGlobalProps, 180000);
   };
 
-  componentWillReceiveProps(nextProps) {
-    const {
-      isDarkTheme: _isDarkTheme, selectedLanguage, isLogingOut, isConnected,
-    } = this.props;
+  componentDidUpdate(prevProps) {
+    const { isLogingOut, isConnected } = this.props;
 
-    if (_isDarkTheme !== nextProps.isDarkTheme || selectedLanguage !== nextProps.selectedLanguage) {
-      this.setState({ isRenderRequire: false }, () => this.setState({ isRenderRequire: true }));
-    }
-
-    if (isLogingOut !== nextProps.isLogingOut && nextProps.isLogingOut) {
+    if (prevProps.isLogingOut !== isLogingOut && isLogingOut) {
       this._logout();
     }
 
-    if (isConnected !== nextProps.isConnected && nextProps.isConnected) {
+    if (prevProps.isConnected !== isConnected && isConnected) {
       this._fetchApp();
     }
   }
@@ -130,6 +114,15 @@ class ApplicationContainer extends Component {
 
     // NetInfo.isConnected.removeEventListener('connectionChange', this._handleConntectionChange);
     clearInterval(this.globalInterval);
+  }
+
+  getSnapshotBeforeUpdate(prevProps) {
+    const { _isDarkTheme } = this.props;
+
+    if (prevProps._isDarkTheme !== _isDarkTheme) {
+      this.setState({ isRenderRequire: false }, () => this.setState({ isRenderRequire: true }));
+    }
+    return null;
   }
 
   _fetchApp = async () => {
@@ -234,7 +227,7 @@ class ApplicationContainer extends Component {
           this._connectNotificationServer(accountData.name);
         })
         .catch((err) => {
-          Alert.alert(err);
+          Alert.alert(err.message);
         });
     }
 
@@ -250,10 +243,11 @@ class ApplicationContainer extends Component {
         if (response.isDarkTheme !== '') dispatch(isDarkTheme(response.isDarkTheme));
         if (response.language !== '') dispatch(setLanguage(response.language));
         if (response.server !== '') dispatch(setApi(response.server));
+        if (response.isDefaultFooter !== '') dispatch(isDefaultFooter(response.isDefaultFooter));
+        if (response.nsfw !== '') dispatch(setNsfw(response.nsfw));
         if (response.upvotePercent !== '') {
           dispatch(setUpvotePercent(Number(response.upvotePercent)));
         }
-        if (response.isDefaultFooter !== '') dispatch(isDefaultFooter(response.isDefaultFooter));
         if (response.notification !== '') {
           dispatch(
             changeNotificationSettings({ type: 'notification', action: response.notification }),
@@ -262,7 +256,6 @@ class ApplicationContainer extends Component {
 
           Push.setEnabled(response.notification);
         }
-        if (response.nsfw !== '') dispatch(setNsfw(response.nsfw));
 
         dispatch(setCurrency(response.currency !== '' ? response.currency : 'usd'));
 
@@ -276,7 +269,6 @@ class ApplicationContainer extends Component {
     const ws = new WebSocket(`${Config.ACTIVITY_WEBSOCKET_URL}?user=${username}`);
 
     ws.onmessage = () => {
-      // a message was received
       dispatch(updateUnreadActivityCount(unreadActivityCount + 1));
     };
   };
@@ -284,53 +276,53 @@ class ApplicationContainer extends Component {
   _logout = async () => {
     const { otherAccounts, currentAccount, dispatch } = this.props;
 
-    await removeUserData(currentAccount.name)
-      .then(async () => {
-        const _otherAccounts = otherAccounts.filter(user => user.username !== currentAccount.name);
+    await removeUserData(currentAccount.name);
+    const _otherAccounts = otherAccounts.filter(user => user.username !== currentAccount.name);
 
-        if (_otherAccounts.length > 0) {
-          const targetAccountUsername = _otherAccounts[0].username;
+    if (_otherAccounts.length > 0) {
+      const targetAccountUsername = _otherAccounts[0].username;
 
-          await this._switchAccount(targetAccountUsername);
-        } else {
-          dispatch(updateCurrentAccount({}));
-          dispatch(login(false));
-          removePinCode();
-          setAuthStatus({ isLoggedIn: false });
-          setExistUser(false);
-          if (currentAccount.local === AUTH_TYPE.STEEM_CONNECT) {
-            removeSCAccount(currentAccount.name);
-          }
-        }
+      await this._switchAccount(targetAccountUsername);
+    } else {
+      dispatch(updateCurrentAccount({}));
+      dispatch(login(false));
+      removePinCode();
+      setAuthStatus({ isLoggedIn: false });
+      setExistUser(false);
+      if (currentAccount.local === AUTH_TYPE.STEEM_CONNECT) {
+        removeSCAccount(currentAccount.name);
+      }
+    }
 
-        dispatch(removeOtherAccount(currentAccount.name));
-        dispatch(logoutDone());
-      })
-      .catch(() => {});
+    dispatch(removeOtherAccount(currentAccount.name));
+    dispatch(logoutDone());
   };
 
   _switchAccount = async (targetAccountUsername) => {
     const { dispatch } = this.props;
 
-    await switchAccount(targetAccountUsername).then((accountData) => {
-      const realmData = getUserDataWithUsername(targetAccountUsername);
-      const _currentAccount = accountData;
-      _currentAccount.username = accountData.name;
-      [_currentAccount.local] = realmData;
+    const accountData = await switchAccount(targetAccountUsername);
+    const realmData = getUserDataWithUsername(targetAccountUsername);
+    const _currentAccount = accountData;
+    _currentAccount.username = accountData.name;
+    [_currentAccount.local] = realmData;
 
-      dispatch(updateCurrentAccount(_currentAccount));
-    });
+    dispatch(updateCurrentAccount(_currentAccount));
   };
 
-  render() {
-    const { selectedLanguage, isConnected, toastNotification } = this.props;
-    const { isRenderRequire, isReady, isThemeReady } = this.state;
+  _hideToastNotification = () => {
+    const { dispatch } = this.props;
+    dispatch(toastNotificationAction(''));
+  }
 
-    // For testing It comented out.
-    // const locale = (navigator.languages && navigator.languages[0])
-    //   || navigator.language
-    //   || navigator.userLanguage
-    //   || selectedLanguage;
+  render() {
+    const {
+      selectedLanguage,
+      isConnected,
+      toastNotification,
+      _isDarkTheme,
+    } = this.props;
+    const { isRenderRequire, isReady, isThemeReady } = this.state;
 
     if (isRenderRequire && isThemeReady) {
       return (
@@ -339,7 +331,8 @@ class ApplicationContainer extends Component {
           locale={selectedLanguage}
           toastNotification={toastNotification}
           isReady={isReady}
-          {...this.props}
+          isDarkTheme={_isDarkTheme}
+          hideToastNotification={this._hideToastNotification}
         />
       );
     }
@@ -350,7 +343,7 @@ class ApplicationContainer extends Component {
 export default connect(
   state => ({
     // Application
-    isDarkTheme: state.application.isDarkTheme,
+    _isDarkTheme: state.application.isDarkTheme,
     selectedLanguage: state.application.language,
     notificationSettings: state.application.isNotificationOpen,
     isLogingOut: state.application.isLogingOut,
