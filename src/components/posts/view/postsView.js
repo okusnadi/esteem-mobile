@@ -219,6 +219,7 @@ class PostsView extends Component {
 
   _handleOnPressLogin = () => {
     const { navigation } = this.props;
+    throw new Error('This is test error for Sentry');
     navigation.navigate(ROUTES.SCREENS.LOGIN);
   };
 

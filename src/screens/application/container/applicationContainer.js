@@ -8,6 +8,8 @@ import Config from 'react-native-config';
 import { NavigationActions } from 'react-navigation';
 import { bindActionCreators } from 'redux';
 import Push from 'appcenter-push';
+import { Sentry } from 'react-native-sentry';
+
 
 // Languages
 import en from 'react-intl/locale-data/en';
@@ -101,6 +103,10 @@ class ApplicationContainer extends Component {
     } else {
       Alert.alert('No internet connection');
     }
+
+    Sentry.captureException(new Error('sadsaf'), {
+      logger: 'my.module'
+    });
 
     this.globalInterval = setInterval(this._refreshGlobalProps, 180000);
   };
