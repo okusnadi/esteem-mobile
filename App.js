@@ -4,7 +4,7 @@ import App from './src/index';
 
 Sentry.config('https://aeaa78debe6d428984f9823f4aee0681@sentry.io/1457345', {
   deactivateStacktraceMerging: false,
-  logLevel: SentryLog.Verbose,
+  logLevel: SentryLog.Debug,
   disableNativeIntegration: false,
   handlePromiseRejection: true,
 }).install();
