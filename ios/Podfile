@@ -40,7 +40,6 @@ target 'eSteem' do
 
 
 
-  pod 'SentryReactNative', :path => '../node_modules/react-native-sentry'
 
   target 'eSteemTests' do
     inherit! :search_paths
