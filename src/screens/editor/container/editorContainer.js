@@ -520,8 +520,10 @@ class EditorContainer extends Component {
     }
   };
 
-  _handleDatePickerChange = (datePickerValue, fields) => {
-    this._submitPost(fields, datePickerValue);
+  _handleDatePickerChange = (datePickerValues, fields) => {
+    const { time, date } = datePickerValues;
+
+    this._submitPost(fields, datePickerValues);
   };
 
   _setScheduledPost = (data) => {

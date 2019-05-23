@@ -67,17 +67,12 @@ class BasicHeaderView extends Component {
     const { datePickerDate } = this.state;
 
     if (!isTime) {
-      this.setState({
-        datePickerDate: datePickerValue,
-      });
+      this.setState({ datePickerDate: datePickerValue });
     } else {
-      this.setState({
-
-        datePickerTime: datePickerValue,
-      });
+      this.setState({ datePickerTime: datePickerValue });
 
       if (handleDatePickerChange) {
-        handleDatePickerChange(datePickerDate, datePickerValue);
+        handleDatePickerChange({ date: datePickerDate, time: datePickerValue });
       }
     }
   }
