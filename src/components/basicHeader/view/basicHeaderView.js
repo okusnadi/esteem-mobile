@@ -29,7 +29,8 @@ class BasicHeaderView extends Component {
     super(props);
     this.state = {
       isInputVisible: false,
-      datePickerValue: '',
+      datePickerDate: '',
+      datePickerTime: '',
     };
   }
 
@@ -61,13 +62,23 @@ class BasicHeaderView extends Component {
 
   _handleOnInputChange = () => {};
 
-  _handleDatePickerChange = (datePickerValue) => {
+  _handleDatePickerChange = (datePickerValue, isTime) => {
     const { handleDatePickerChange } = this.props;
+    const { datePickerDate } = this.state;
 
-    this.setState({ datePickerValue });
+    if (!isTime) {
+      this.setState({
+        datePickerDate: datePickerValue,
+      });
+    } else {
+      this.setState({
 
-    if (handleDatePickerChange) {
-      handleDatePickerChange(datePickerValue);
+        datePickerTime: datePickerValue,
+      });
+
+      if (handleDatePickerChange) {
+        handleDatePickerChange(datePickerDate, datePickerValue);
+      }
     }
   }
 
@@ -96,7 +107,7 @@ class BasicHeaderView extends Component {
       rightIconName,
       title,
     } = this.props;
-    const { isInputVisible, datePickerValue } = this.state;
+    const { isInputVisible, datePickerDate, datePickerTime } = this.state;
 
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -193,14 +204,14 @@ class BasicHeaderView extends Component {
                 && (
                 <DatePicker
                   style={{ width: 50 }}
-                  date={datePickerValue}
-                  mode="date"
+                  date={datePickerTime || datePickerDate}
+                  mode={datePickerDate ? 'time' : 'date'}
                   format="YYYY-MM-DD"
                   minDate={moment()}
                   maxDate="3000-06-01"
                   confirmBtnText="Confirm"
                   cancelBtnText="Cancel"
-                  onDateChange={(_datePickerValue) => { this._handleDatePickerChange(_datePickerValue); }}
+                  onDateChange={(_datePickerDate) => { this._handleDatePickerChange(_datePickerDate, datePickerDate); }}
                   hideText
                   disabled={!isFormValid}
                   onPressDate

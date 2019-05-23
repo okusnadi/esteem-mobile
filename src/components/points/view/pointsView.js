@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { injectIntl } from 'react-intl';
 import { Popover, PopoverController } from 'react-native-modal-popover';
-import { get, size } from 'lodash';
+import { get } from 'lodash';
 
 // Components
 import { LineBreak, WalletLineItem, ListPlaceHolder } from '../../basicUIElements';
