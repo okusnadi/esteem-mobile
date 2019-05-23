@@ -208,7 +208,7 @@ class BasicHeaderView extends Component {
                   mode={datePickerDate ? 'time' : 'date'}
                   format="YYYY-MM-DD"
                   minDate={moment()}
-                  maxDate="3000-06-01"
+                  maxDate={datePickerDate ? '00:00' : '3000-06-01'}
                   confirmBtnText="Confirm"
                   cancelBtnText="Cancel"
                   onDateChange={(_datePickerDate) => { this._handleDatePickerChange(_datePickerDate, datePickerDate); }}
