@@ -130,19 +130,6 @@
 			<key>orderHint</key>
 			<integer>30</integer>
 		</dict>
-		<key>Sentry.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-			<key>orderHint</key>
-			<integer>28</integer>
-		</dict>
-		<key>SentryReactNative.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-			<key>orderHint</key>
-			<integer>29</integer>
 		</dict>
 		<key>boost-for-react-native.xcscheme</key>
 		<dict>
