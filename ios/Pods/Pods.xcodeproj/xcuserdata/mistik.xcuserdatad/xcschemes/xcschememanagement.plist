@@ -128,8 +128,7 @@
 			<key>isShown</key>
 			<false/>
 			<key>orderHint</key>
-			<integer>30</integer>
-		</dict>
+			<integer>28</integer>
 		</dict>
 		<key>boost-for-react-native.xcscheme</key>
 		<dict>
