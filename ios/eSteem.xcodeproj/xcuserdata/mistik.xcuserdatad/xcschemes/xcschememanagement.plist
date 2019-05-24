@@ -12,7 +12,11 @@
 		<key>eSteem.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+<<<<<<< HEAD
 			<integer>30</integer>
+=======
+			<integer>29</integer>
+>>>>>>> 841556c0d58bb214ada1792039cf1b9e990bbc82
 		</dict>
 	</dict>
 </dict>
